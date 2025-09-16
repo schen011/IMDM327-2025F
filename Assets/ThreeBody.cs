@@ -15,21 +15,30 @@ public class ThreeBody : MonoBehaviour
     TrailRenderer trailRenderer;
     struct BodyProperty // why struct?
     {                   // https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/choosing-between-class-and-struct
+        public string name;
         public float mass;
+        public float radius;
         public Vector3 velocity;
+        public Vector3 initVelocity;
         public Vector3 acceleration;
     }
 
  
     void Start()
     {
+        
         // Just like GO, computer should know how many room for struct is required:
         bp = new BodyProperty[numberOfSphere];
         body = new GameObject[numberOfSphere];
 
+        bp[0].name = "Sun";
+        bp[0].mass = 2312f;
+        bp[0].radius = 0f;
+        // bp[0].initVelocity
+
         // Loop generating the gameobject and assign initial conditions (type, position, (mass/velocity/acceleration)
         for (int i = 0; i < numberOfSphere; i++)
-        {          
+        {
             // Our gameobjects are created here:
             body[i] = GameObject.CreatePrimitive(PrimitiveType.Cube); // why sphere? try different options.
             // https://docs.unity3d.com/ScriptReference/GameObject.CreatePrimitive.html
@@ -42,7 +51,7 @@ public class ThreeBody : MonoBehaviour
             // body[i].transform.position = new Vector3( ***, *** , 180);
             // z = 180 to see this happen in front of me. Try something else (randomize) too.
 
-            bp[i].velocity = new Vector3(0,0,0); // Try different initial condition
+            bp[i].velocity = new Vector3(0, 0, 0); // Try different initial condition
             bp[i].mass = 1; // Simplified. Try different initial condition
 
 
@@ -57,7 +66,7 @@ public class ThreeBody : MonoBehaviour
             // Set the trail color over time
             Gradient gradient = new Gradient();
             gradient.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(Color.white, 0.0f), new GradientColorKey(new Color (Mathf.Cos(Mathf.PI * 2 / numberOfSphere * i), Mathf.Sin(Mathf.PI * 2 / numberOfSphere * i), Mathf.Tan(Mathf.PI * 2 / numberOfSphere * i)), 0.80f) },
+                new GradientColorKey[] { new GradientColorKey(Color.white, 0.0f), new GradientColorKey(new Color(Mathf.Cos(Mathf.PI * 2 / numberOfSphere * i), Mathf.Sin(Mathf.PI * 2 / numberOfSphere * i), Mathf.Tan(Mathf.PI * 2 / numberOfSphere * i)), 0.80f) },
                 new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.0f, 1.0f) }
             );
             trailRenderer.colorGradient = gradient;
