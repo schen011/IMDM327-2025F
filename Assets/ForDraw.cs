@@ -13,7 +13,7 @@ public class ForDraw : MonoBehaviour
     }
     GameObject[] body;
     public Material[] material;
-    private int numberOfSphere = 300;
+    private int numberOfSphere = 100;
     private float timeflow = 0;
     float mass = 1f;
     float radius = 0.2f;
@@ -87,10 +87,10 @@ public class ForDraw : MonoBehaviour
 
                     // F = G * m1 * m2 / r^2
                     float distance = Vector3.Distance(body[i].transform.position, body[j].transform.position);
-                    float accel = G * b[i].mass * b[j].mass / (distance * distance); 
+                    float gravity = G * b[i].mass * b[j].mass / (distance * distance); 
                     // Vector3 direction = Vector3.Normalize(body[j].transform.position - body[i].transform.position);
-                    b[i].acceleration += accel/b[i].mass * Vector3.Normalize(body[j].transform.position - body[i].transform.position);
-                    b[j].acceleration += accel/b[j].mass * Vector3.Normalize(body[i].transform.position - body[j].transform.position);
+                    b[i].acceleration += gravity/b[i].mass * Vector3.Normalize(body[j].transform.position - body[i].transform.position);
+                    b[j].acceleration += gravity/b[j].mass * Vector3.Normalize(body[i].transform.position - body[j].transform.position);
 
                     Debug.Log($"V: {b[i].velocity}\naccel: {b[i].acceleration}\n del time: {Time.deltaTime}");
                 }

@@ -11,7 +11,7 @@ public class ThreeBody : MonoBehaviour
     private const float G = 500f; // Gravity constant https://en.wikipedia.org/wiki/Gravitational_constant
     GameObject[] body;
     BodyProperty[] bp;
-    private int numberOfSphere = 3;
+    private int numberOfSphere = 300;
     TrailRenderer trailRenderer;
     struct BodyProperty // why struct?
     {                   // https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/choosing-between-class-and-struct
@@ -40,11 +40,11 @@ public class ThreeBody : MonoBehaviour
         for (int i = 0; i < numberOfSphere; i++)
         {
             // Our gameobjects are created here:
-            body[i] = GameObject.CreatePrimitive(PrimitiveType.Cube); // why sphere? try different options.
+            body[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere); // why sphere? try different options.
             // https://docs.unity3d.com/ScriptReference/GameObject.CreatePrimitive.html
 
             // initial conditions
-            float r = 100f;
+            //////// float r = 100f;
             // position is (x,y,z). In this case, I want to plot them on the circle with r
 
             // ******** Fill in this part ********
@@ -89,8 +89,9 @@ public class ThreeBody : MonoBehaviour
     private Vector3 CalculateGravity(Vector3 distanceVector, float m1, float m2)
     {
         Vector3 gravity = new Vector3(0f,0f,0f); // note this is also Vector3
-       // **** Fill in the function below. 
-        // gravity = ****;
+                                                 // **** Fill in the function below. 
+        float eps = 0.1f;
+        gravity = G * m1 * m2 / (distanceVector.magnitude + eps) * distanceVector.normalized;
         return gravity;
     }
 }
