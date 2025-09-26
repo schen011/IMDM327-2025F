@@ -28,6 +28,12 @@ public class DataCSV : MonoBehaviour
         G = 6.6743e-11f;
         fastforwardConst = 50000f;
 
+        // placing camera
+        Transform camera = Camera.main.transform;
+
+        camera.position = new Vector3(0, 450, -170);
+        camera.rotation = Quaternion.Euler(new Vector3(70,0,0));
+
         // sets up bp
         LoadIntoArray();
         Debug.Log($"bp length :{bp.Length}");
