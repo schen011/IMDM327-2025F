@@ -1,7 +1,19 @@
-![Sound](https://github.com/user-attachments/assets/348a0502-0e68-42f1-b30e-58dc77cb91aa)
+# IMDM327 Fall 2025 
 
-IMDM327 Fall 2025 
+- Instructor. Myungin Lee
+- TA. Mateo Rodriguez
 
-Course Material
+## Assignment 1
 
-Instructor. Myungin Lee
+**Scene 1**
+
+> N-Body Problem: [ForDraw.cs](https://github.com/schen011/IMDM327-2025F/blob/main/Assets/ForDraw.cs)
+
+<img src="https://github.com/schen011/IMDM327-2025F/blob/main/.images/Scene%201.png?raw=true" width="41%"> ![Scene1 N-Body](https://github.com/schen011/IMDM327-2025F/blob/main/.images/Scene%201%20gif.gif?raw=true)
+
+**Scene 2**
+
+> Solar System: [DataCSV.cs](https://github.com/schen011/IMDM327-2025F/blob/main/Assets/DataCSV.cs)
+
+<img src="https://github.com/schen011/IMDM327-2025F/blob/main/.images/Scene%202.png?raw=true" width="42%"> ![Scene2 Solar System](https://github.com/schen011/IMDM327-2025F/blob/main/.images/Scene%202%20gif.gif?raw=true)
+
