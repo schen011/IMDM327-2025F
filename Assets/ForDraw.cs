@@ -14,7 +14,6 @@ public class ForDraw : MonoBehaviour
     GameObject[] body;
     public Material[] material;
     private int numberOfSphere = 100;
-    private float timeflow = 0;
     float mass = 1f;
     float radius = 0.2f;
     float G = 0.5f;
@@ -25,6 +24,13 @@ public class ForDraw : MonoBehaviour
 
     void Start()
     {
+        // placing camera
+        Transform camera = Camera.main.transform;
+
+        camera.position = new Vector3(0, 30, 0);
+        camera.rotation = Quaternion.Euler(new Vector3(90,0,0));
+
+        // spawning bodies
         body = new GameObject[numberOfSphere];
         b = new BodyProperty[numberOfSphere];
 
@@ -36,20 +42,23 @@ public class ForDraw : MonoBehaviour
                                                                         // https://docs.unity3d.com/ScriptReference/GameObject.CreatePrimitive.html
 
             // initial position
-            float x = radius * Random.Range(-50f, 20f);
-            float y = radius * Random.Range(-5f, 0f);
-            float z = radius * Random.Range(-50f, 20f);
-            Vector3 pos = new Vector3(x, y, z);
+            float x = radius * Random.Range(-50f, 50f);
+            float y = radius * Random.Range(-5f, 5f);
+            float z = radius * Random.Range(-50f, 50f);
 
-            body[i].transform.position = pos;
+            Vector3 position = new Vector3(x, y, z);
+            body[i].transform.position = position;
 
-            b[i].position = pos;
+            // initializing b fields
+            b[i].position = position;
             b[i].mass = mass;
 
             // initial color
             var meshRenderer = body[i].GetComponent<Renderer>();
-            meshRenderer.material.SetColor("_Color", new Color(Random.Range(0f, 255f) / 255f, 1f, .5f));
-            
+            meshRenderer.material.SetColor("_Color", new Color(Random.Range(0f, 255f) / 255f,
+                                                               Random.Range(0f, 255f) / 255f,
+                                                               Random.Range(0f, 255f) / 255f));
+
             // + This is just pretty trails
             trailRenderer = body[i].AddComponent<TrailRenderer>();
             // Configure the TrailRenderer's properties
@@ -61,47 +70,51 @@ public class ForDraw : MonoBehaviour
             // Set the trail color over time
             Gradient gradient = new Gradient();
             gradient.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(Color.white, 0.0f), new GradientColorKey(new Color (Mathf.Cos(Mathf.PI * 2 / numberOfSphere * i), Mathf.Sin(Mathf.PI * 2 / numberOfSphere * i), Mathf.Tan(Mathf.PI * 2 / numberOfSphere * i)), 0.80f) },
+                new GradientColorKey[] { new GradientColorKey(Color.white, 0.0f), new GradientColorKey(new Color(Mathf.Cos(Mathf.PI * 2 / numberOfSphere * i), Mathf.Sin(Mathf.PI * 2 / numberOfSphere * i), Mathf.Tan(Mathf.PI * 2 / numberOfSphere * i)), 0.80f) },
                 new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.0f, 1.0f) }
             );
             trailRenderer.colorGradient = gradient;
         }
     }
 
-    
+
     void Update()
     {
-        timeflow += Time.deltaTime;
-        // How to make them move over the time
-
-       for (int i = 0; i < numberOfSphere; i++)
-            b[i].acceleration = new Vector3(0f, 0f, 0f);
-        
-            
+        // initailize acceleration
         for (int i = 0; i < numberOfSphere; i++)
         {
-
-            //calculate acceleration
-                for (int j = i+1; j < numberOfSphere; j++)
-                {
-
-                    // F = G * m1 * m2 / r^2
-                    float distance = Vector3.Distance(body[i].transform.position, body[j].transform.position);
-                    float gravity = G * b[i].mass * b[j].mass / (distance * distance); 
-                    // Vector3 direction = Vector3.Normalize(body[j].transform.position - body[i].transform.position);
-                    b[i].acceleration += gravity/b[i].mass * Vector3.Normalize(body[j].transform.position - body[i].transform.position);
-                    b[j].acceleration += gravity/b[j].mass * Vector3.Normalize(body[i].transform.position - body[j].transform.position);
-
-                    Debug.Log($"V: {b[i].velocity}\naccel: {b[i].acceleration}\n del time: {Time.deltaTime}");
-                }
-            
-            b[i].velocity += b[i].acceleration * Time.deltaTime;
-            // b[i].position += b[i].velocity * Time.deltaTime;
-            body[i].transform.position += b[i].velocity;
-
-
+            b[i].acceleration = Vector3.zero; // important
         }
 
+        // ACCELERATION
+        for (int i = 0; i < numberOfSphere; i++)
+        {
+            for (int j = i + 1; j < numberOfSphere; j++)
+            {
+                Vector3 distance = body[j].transform.position - body[i].transform.position;
+                // Gravity
+                Vector3 gravity = CalculateGravity(distance, b[i].mass, b[j].mass);
+                // Apply Gravity
+                // F = ma -> a = F/m
+                // Gravity is push and pull with same amount. Force: m1 <-> m2
+                b[i].acceleration += gravity / b[i].mass; // why is this +?
+                b[j].acceleration -= gravity / b[j].mass; 
+
+                // Debug.Log($"V: {b[i].velocity}\naccel: {b[i].acceleration}\n del time: {Time.deltaTime}");
+            }
+            b[i].velocity += b[i].acceleration * Time.deltaTime;
+            body[i].transform.position += b[i].velocity * Time.deltaTime;
+
+        }
+    }
+    
+    private Vector3 CalculateGravity(Vector3 distanceVector, float m1, float m2)
+    {
+        Vector3 gravity = Vector3.zero; // note this is also Vector3
+                                                   // **** Fill in the function below.
+        float eps = 0.1f;                                                   
+        gravity = G * m1 * m2 / (distanceVector.magnitude + eps) * distanceVector.normalized;
+        return gravity;
     }
 }
 
