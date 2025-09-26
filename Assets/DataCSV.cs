@@ -17,8 +17,8 @@ public class DataCSV : MonoBehaviour
     public GameObject[] body;
 
     // [Range(0.000000001f, 1f)]
-    public float G = 6.6743e-11f;
-    public float fastforwardConst = 10000f;
+    public float G;
+    public float fastforwardConst;
 
     TrailRenderer trailRenderer;
 
