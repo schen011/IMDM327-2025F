@@ -8,6 +8,7 @@ public struct BodyProperty
     public float initial_velocity;
     public Vector3 acceleration;
     public Vector3 velocity;
+    public Vector3 position;
 }
 
 public class DataCSV : MonoBehaviour
@@ -16,61 +17,57 @@ public class DataCSV : MonoBehaviour
     public GameObject[] body;
 
     // [Range(0.000000001f, 1f)]
-    public float scale;
-    // public float massScale = 1f;
-    public float G;
+    public float G = 6.6743e-11f;
+    public float fastforwardConst = 10000f;
 
     TrailRenderer trailRenderer;
 
 
     void Start()
     {
-        scale = 1e-10f;
-        G = 10f;
-        // massScale = 1e-5f;
+        G = 6.6743e-11f;
+        fastforwardConst = 50000f;
 
         // sets up bp
         LoadIntoArray();
         Debug.Log($"bp length :{bp.Length}");
 
-        for (int i = 0; i < bp.Length; i++)
-        {
-            bp[i].acceleration = new Vector3(0f, 0f, 0f);
-        }
-
-
-
-        // SpawnPlanets();
-        Debug.Log("heyy");
-        
+        // SPAWNING PLANETS        
         if (bp == null) Debug.LogError("bp not yet initalized.");
 
         body = new GameObject[bp.Length];
 
         for (int i = 0; i < bp.Length; i++)
         {
+            // spawning spheres
             body[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-            // initial position
+            // setting initial position 
             float theta = Random.Range(0, 2 * Mathf.PI);
-            float x = bp[i].distance * Mathf.Cos(theta) * scale;
+            float x = bp[i].distance * Mathf.Cos(theta);
             float y = bp[i].distance * 0;
-            float z = bp[i].distance * Mathf.Sin(theta) * scale;
-            Vector3 pos = new Vector3(x, y, z);
+            float z = bp[i].distance * Mathf.Sin(theta);
 
-            body[i].transform.position = pos;
+            bp[i].position = new Vector3(x, y, z);
+            ApplyScaledPosition(i);
 
-            Debug.Log($"Theta: {theta}\nBody {i}: {x},{y},{z}; {bp[i].distance}\n");
+            //intial velocity
+            bp[i].velocity = new Vector3(bp[i].initial_velocity * Mathf.Cos(theta + Mathf.PI/2), 0,
+                                         bp[i].initial_velocity * Mathf.Sin(theta + Mathf.PI/2));
+
+            // Debug.Log($"Theta: {theta}\nBody {i}: x:{x}, y:{y}, z:{z}; {bp[i].distance}");
 
             // change scale
-            // body[i].transform.localScale = new Vector3(bp[i].mass * massScale,
-            //                                            bp[i].mass * massScale,
-            //                                            bp[i].mass * massScale);
+            float scale = Mathf.Sqrt(bp[i].mass / 1e28f);
+            body[i].transform.localScale = new Vector3(scale, scale, scale);
+            // body[i].transform.localScale = new Vector3(10,10,10);
 
-            // initial color
+            // Trail Renderer
             {
                 var meshRenderer = body[i].GetComponent<Renderer>();
-                meshRenderer.material.SetColor("_Color", new Color(Random.Range(0f, 255f) / 255f, 1f, .5f));
+                meshRenderer.material.SetColor("_Color", new Color(Random.Range(0f, 255f) / 255f,
+                                                                   Random.Range(0f, 255f) / 255f,
+                                                                   Random.Range(0f, 255f) / 255f));
 
                 // + This is just pretty trails
                 trailRenderer = body[i].AddComponent<TrailRenderer>();
@@ -96,88 +93,49 @@ public class DataCSV : MonoBehaviour
     {
         // How to make them move over the time
 
-    //    for (int i = 0; i < bp.Length; i++)
-            // bp[i].acceleration = new Vector3(0f, 0f, 0f); /// fix this?
-        
-            
+        for (int i = 0; i < bp.Length; i++)
+            bp[i].acceleration = Vector3.zero; 
+
+
         for (int i = 0; i < bp.Length; i++)
         {
             //calculate acceleration
             for (int j = i + 1; j < bp.Length; j++)
             {
-                Vector3 diff = body[j].transform.position - body[i].transform.position; //////////
-                
+                Vector3 diff = bp[j].position - bp[i].position; 
+
                 float dist = diff.magnitude + 0.001f;
                 Vector3 direction = diff.normalized;
-                
+
                 float m1 = bp[i].mass;
                 float m2 = bp[j].mass;
 
                 // F = G * m1 * m2 / r^2
                 float gravity = G * m1 * m2 / (dist * dist);
 
+                // a = F/m
                 bp[i].acceleration += (gravity * direction) / m1;
                 bp[j].acceleration -= (gravity * direction) / m2;
             }
+
+            bp[i].velocity += bp[i].acceleration * fastforwardConst;
+            bp[i].position += bp[i].velocity * fastforwardConst;
+
+            // applying scaled positions to body objects
+            ApplyScaledPosition(i);
             
-            bp[i].velocity += bp[i].acceleration * 5000;
-            body[i].transform.position += bp[i].velocity * 5000;
-
+            Debug.Log($"Body {i} Pos - x: {body[i].transform.position.x}, y: {body[i].transform.position.y}, z: {body[i].transform.position.z}");
         }
     }
-    
 
-    void SpawnPlanets()
-    {
-        Debug.Log("heyy");
+    void ApplyScaledPosition(int i)
+    {   
+        // scale distances and multiply by normalized vector (direction)
+        float scaledDistance = Mathf.Sqrt(bp[i].position.magnitude / 1e8f);
+        Vector3 directionForScale = bp[i].position.normalized;
 
-        if (bp == null) Debug.LogError("bp not yet initalized.");
-
-        body = new GameObject[bp.Length];
-
-        for (int i = 0; i < bp.Length; i++)
-        {
-            body[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-
-            // initial position
-            float theta = Random.Range(0, 2 * Mathf.PI);
-            float x = bp[i].distance * Mathf.Cos(theta) * scale;
-            float y = bp[i].distance * 0;
-            float z = bp[i].distance * Mathf.Sin(theta) * scale;
-            Vector3 pos = new Vector3(x, y, z);
-
-            body[i].transform.position = pos;
-
-            Debug.Log($"Theta: {theta}\nBody {i}: {x},{y},{z}; {bp[i].distance}\n");
-
-            // change scale
-            // body[i].transform.localScale = new Vector3(bp[i].mass * massScale,
-            //                                            bp[i].mass * massScale,
-            //                                            bp[i].mass * massScale);
-
-            // initial color
-            {
-                var meshRenderer = body[i].GetComponent<Renderer>();
-                meshRenderer.material.SetColor("_Color", new Color(Random.Range(0f, 255f) / 255f, 1f, .5f));
-
-                // + This is just pretty trails
-                trailRenderer = body[i].AddComponent<TrailRenderer>();
-                // Configure the TrailRenderer's properties
-                trailRenderer.time = 100.0f;  // Duration of the trail
-                trailRenderer.startWidth = 0.5f;  // Width of the trail at the start
-                trailRenderer.endWidth = 0.1f;    // Width of the trail at the end
-                                                  // a material to the trail
-                trailRenderer.material = new Material(Shader.Find("Sprites/Default"));
-                // Set the trail color over time
-                Gradient gradient = new Gradient();
-                gradient.SetKeys(
-                    new GradientColorKey[] { new GradientColorKey(Color.white, 0.0f), new GradientColorKey(new Color(Mathf.Cos(Mathf.PI * 2 / bp.Length * i), Mathf.Sin(Mathf.PI * 2 / bp.Length * i), Mathf.Tan(Mathf.PI * 2 / bp.Length * i)), 0.80f) },
-                    new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.0f, 1.0f) }
-                );
-                trailRenderer.colorGradient = gradient;
-            }
-        }
-    }
+        body[i].transform.position = scaledDistance * directionForScale;
+    }    
 
     void LoadIntoArray()
     {
