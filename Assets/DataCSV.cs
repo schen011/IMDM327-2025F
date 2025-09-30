@@ -26,7 +26,7 @@ public class DataCSV : MonoBehaviour
     void Start()
     {
         G = 6.6743e-11f;
-        fastforwardConst = 50000f;
+        fastforwardConst = 10000f;
 
         // placing camera
         Transform camera = Camera.main.transform;
